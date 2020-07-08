@@ -1,0 +1,46 @@
+version: 2.1
+
+description: >
+  Integrate Github CLI with your CircleCI CI/CD pipeline easily with the github orb.
+
+display:
+  home_url: https://cli.github.com/
+  source_url: https://github.com/topmonks/circleci
+
+orbs:
+  jq: circleci/jq@2.2.0
+
+commands:
+  install:
+    description: Installs latest Github CLI
+    steps:
+      - jq/install
+      - run:
+          name: Install Github CLI
+          command: |
+            LATEST_RELEASE=$(curl -s https://api.github.com/repos/cli/cli/releases/latest)
+            VERSION=$(echo $LATEST_RELEASE | jq -r '.tag_name')
+            DEB_URL=$(echo $LATEST_RELEASE | jq -r '.assets[].browser_download_url | select(. | contains("linux_amd64.deb"))')
+            wget --quiet -O gh_latest.deb $DEB_URL
+            sudo apt install ./gh_latest.deb
+
+  merge_pr:
+    description: Merges current Pull Request
+    parameters:
+      delete_branch:
+        type: boolean
+        description: Delete the local and remote branch after merge (default true)
+        default: true
+      merge:
+        type: boolean
+        description: Merge the commits with the base branch
+      rebase:
+        type: boolean
+        description: Rebase the commits onto the base branch
+      squash:
+        type: boolean
+        description: Squash the commits into one commit and merge it into the base branch
+    steps:
+      - run:
+          name: Merge PR
+          command: gh pr merge $CI_PULL_REQUEST <<# parameters.delete_branch >>--delete-branch<</ parameters.delete_branch >> <<# parameters.merge >>--merge<</ parameters.merge >> <<# parameters.rebase >>--rebase<</ parameters.rebase >> <<# parameters.squash >>--squash<</ parameters.squash >>
