@@ -1,0 +1,42 @@
+version: 2.1
+
+description: >
+  Integrate Amazon AWS Cloudfront with your CircleCI CI/CD pipeline easily with the aws-cloudfront orb.
+
+display:
+  home_url: https://aws.amazon.com/cloudfront/
+  source_url: https://github.com/topmonks/circleci
+
+orbs:
+  aws-cli: circleci/aws-cli@1.2.1
+
+commands:
+  invalidate:
+    parameters:
+      distribution_id:
+        type: string
+        description: The distribution's id.
+      paths:
+        type: string
+        description: The space-separated paths to be invalidated.
+      aws-access-key-id:
+        type: env_var_name
+        description: aws access key id override
+        default: AWS_ACCESS_KEY_ID
+      aws-secret-access-key:
+        type: env_var_name
+        description: aws secret access key override
+        default: AWS_SECRET_ACCESS_KEY
+      aws-region:
+        type: env_var_name
+        description: aws region override
+        default: AWS_REGION
+    steps:
+      - aws-cli/setup:
+          aws-access-key-id: << parameters.aws-access-key-id >>
+          aws-secret-access-key: << parameters.aws-secret-access-key >>
+          aws-region: << parameters.aws-region >>
+      - run:
+          name: Invalidate Cloudfront distribution << parameters.distribution_id >>
+          command: |
+            aws cloudfront create-invalidation --distribution-id=<< parameters.distribution_id >> --paths=<< parameters.paths >>
