@@ -17,6 +17,7 @@ commands:
       - jq/install
       - run:
           name: Install Github CLI
+          description: Gets latest realease version of Github CLI
           command: |
             LATEST_RELEASE=$(curl -s https://api.github.com/repos/cli/cli/releases/latest)
             VERSION=$(echo $LATEST_RELEASE | jq -r '.tag_name')
@@ -47,3 +48,35 @@ commands:
       - run:
           name: Merge PR
           command: gh pr merge $CI_PULL_REQUEST <<# parameters.delete_branch >>--delete-branch<</ parameters.delete_branch >> <<# parameters.merge >>--merge<</ parameters.merge >> <<# parameters.rebase >>--rebase<</ parameters.rebase >> <<# parameters.squash >>--squash<</ parameters.squash >>
+
+examples:
+  automerge_dependabot_prs:
+    description: >
+      Automerges successful build of Dependabot Pull Request
+    usage:
+      version: 2.1
+      orbs:
+        github: topmonks/github@1.0.2
+      jobs:
+        merge_pr:
+          docker:
+            - image: cimg/base:2020.01
+          steps:
+            - checkout
+            - github/install
+            - github/merge_pr:
+                rebase: true
+      workflows:
+        ci:
+          jobs:
+            - merge_pr:
+                # set GITHUB_TOKEN environment variable into this context
+                # How to generate tokens? https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
+                # How to create contexts? https://circleci.com/docs/2.0/contexts/
+                context: github-cli
+                requires:
+                  # here enumerate jobs that determine successful validation of PR
+                  - build
+                filters:
+                  branches:
+                    only: /dependabot\/.*/
