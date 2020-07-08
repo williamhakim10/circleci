@@ -29,17 +29,20 @@ commands:
     parameters:
       delete_branch:
         type: boolean
-        description: Delete the local and remote branch after merge (default true)
-        default: true
+        description: Delete the local and remote branch after merge
+        default: false
       merge:
         type: boolean
         description: Merge the commits with the base branch
+        default: false
       rebase:
         type: boolean
         description: Rebase the commits onto the base branch
+        default: false
       squash:
         type: boolean
         description: Squash the commits into one commit and merge it into the base branch
+        default: false
     steps:
       - run:
           name: Merge PR
