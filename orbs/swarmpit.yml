@@ -11,6 +11,7 @@ commands:
   deploy_stack:
     description: >
       Deploys docker-compose.yml file as stack via Swarmpit API. Creates new or updates existing stack.
+      Swarmpit API Key and URL should be set via Context with `SWARMPIT_API_URL` and `SWARMPIT_API_KEY` variables.
     parameters:
       stack_name:
         type: string
@@ -39,3 +40,41 @@ commands:
             URL="<< parameters.swarmpit_api_url >>/stacks$([ "$STATUS" = "200" ] && echo '/<< parameters.stack_name >>' || echo '')"
             jq -n --arg compose "$(< << parameters.compose_file_path >>)" '{ "name": "<< parameters.stack_name >>", "spec": { "compose": $compose } }' | \
             curl -sS -X POST -d @- -H 'Content-Type: application/json' -H 'Accept: application/json' -H "authorization: << parameters.swarmpit_api_key >>" "$URL"
+
+examples:
+  stack_deploy:
+    description: >
+      Push newly build image to Docker Hub and then deploy stack definition in `./docker-compose.yml` to Swarm.
+      Swarmpit API endpoint and API Key are stored in `org-swarmpit` CircleCI context.
+    usage:
+      version: 2.1
+
+      orbs:
+        docker: circleci/docker@1.4.0
+        swarmpit: topmonks/swarmpit@1.0.0
+
+      jobs:
+        # ...
+        docker_deploy:
+          executor: docker/docker
+          steps:
+            - setup_remote_docker
+            - checkout
+            - docker/check
+            - docker/push:
+                image: my-org/my-service
+                tag: latest
+            - swarmpit/deploy_stack:
+                stack_name: my-service
+
+      workflows:
+        build_and_deploy:
+          jobs:
+            # ...
+            - docker_deploy:
+                context: org-swarmpit
+                requires:
+                # ...
+                filters:
+                  branches:
+                    only: trunk
