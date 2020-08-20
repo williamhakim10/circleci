@@ -10,7 +10,7 @@ display:
 commands:
   deploy_stack:
     description: >
-      Deploys docker-compose.yml file as stack via Swarmpit API. Creates new or updates existing stack.
+      Deploys docker-compose.yml file as a stack via Swarmpit API. Creates new or updates an existing stack.
       Swarmpit API Key and URL should be set via Context with SWARMPIT_API_URL and SWARMPIT_API_KEY variables.
     parameters:
       stack_name:
@@ -18,21 +18,21 @@ commands:
         description: Name of the stack to deploy.
       compose_file_path:
         type: string
-        description: Path to stack definition (docker-compose) file.
+        description: Path to the stack definition (docker-compose) file.
         default: docker-compose.yml
       swarmpit_api_url:
         type: string
-        description: URL of API endpoint of your Swarmpit instance. eg. https://swarmpit.my.cloud/api
+        description: URL of the API endpoint of your Swarmpit instance (eg. https://swarmpit.my.cloud/api).
         default: "$SWARMPIT_API_URL"
       swarmpit_api_key:
         type: string
-        description: API Key to access Swarmpit API. You will get it in Swarmpit account management.
+        description: API Key to access the Swarmpit API. You will get it in Swarmpit account management.
         default: "$SWARMPIT_API_KEY"
     steps:
       - run:
           name: Deploy stack << parameters.stack_name >>
           description: >
-            Checks for existing stack and creates or updates stack with docker compose file definition
+            Checks for an existing stack and creates or updates the stack with docker-compose file definition.
           command: |
             # Check for existing stack: 200 - exists, 400 - doesn't exist
             STATUS=$(curl -I -sS -o /dev/null -w "%{http_code}" -X GET -H 'Accept: application/json' -H "authorization: << parameters.swarmpit_api_key >>" "<< parameters.swarmpit_api_url >>/stacks/<< parameters.stack_name >>/compose")
@@ -44,8 +44,8 @@ commands:
 examples:
   stack_deploy:
     description: >
-      Push newly build image to Docker Hub and then deploy stack definition in ./docker-compose.yml to Swarm.
-      Swarmpit API endpoint and API Key are stored in org-swarmpit CircleCI context.
+      Push the newly built image to Docker Hub and then deploy the stack definition in ./docker-compose.yml to the Swarm.
+      Swarmpit API endpoint and API Key are stored in the org-swarmpit CircleCI context.
     usage:
       version: 2.1
 
