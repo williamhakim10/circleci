@@ -1,7 +1,7 @@
 version: 2.1
 
 description: >
-  Integrate Swarmpit with your CircleCI CI/CD pipeline easily with the swarmpit orb.
+  Deploy your stacks to Docker Swarm via Swarmpit API.
 
 display:
   home_url: https://swarmpit.io/
@@ -14,14 +14,18 @@ commands:
     parameters:
       stack_name:
         type: string
+        description: Name of the stack to deploy.
       compose_file_path:
         type: string
+        description: Path to stack definition (docker-compose) file.
         default: docker-compose.yml
       swarmpit_api_url:
         type: string
+        description: URL of API endpoint of your Swarmpit instance. eg. https://swarmpit.my.cloud/api
         default: "$SWARMPIT_API_URL"
       swarmpit_api_key:
         type: string
+        description: API Key to access Swarmpit API. You will get it in Swarmpit account management.
         default: "$SWARMPIT_API_KEY"
     steps:
       - run:
