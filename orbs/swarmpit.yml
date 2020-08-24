@@ -102,6 +102,30 @@ examples:
         docker: circleci/docker@1.4.0
         swarmpit: topmonks/swarmpit@1.0.0
 
+      workflows:
+        build_and_deploy:
+          jobs:
+            - docker/publish:
+                name: docker-publish
+                context: org-docker
+                image: my-org/my-service
+                tag: latest
+            - swarmpit/deploy:
+                stack_name: my-service
+                context: org-swarmpit
+                requires:
+                  - docker-publish
+  stack_deploy_job:
+    description: >
+      Push the newly built image to Docker Hub and then deploy the stack definition in ./docker-compose.yml to the Swarm.
+      Swarmpit API endpoint and API Key are stored in the org-swarmpit CircleCI context.
+    usage:
+      version: 2.1
+
+      orbs:
+        docker: circleci/docker@1.4.0
+        swarmpit: topmonks/swarmpit@1.0.0
+
       jobs:
         docker_deploy:
           executor: docker/docker
