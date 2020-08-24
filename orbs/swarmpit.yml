@@ -41,6 +41,54 @@ commands:
             jq -n --arg compose "$(< << parameters.compose_file_path >>)" '{ "name": "<< parameters.stack_name >>", "spec": { "compose": $compose } }' | \
             curl -f -X POST -d @- -H 'Content-Type: application/json' -H 'Accept: application/json' -H "authorization: << parameters.swarmpit_api_key >>" "$URL"
             # TODO: Improve error handling. We currently propagate Error status to exit code, but error response from server is swalloved.
+executors:
+  default:
+    description: |
+      The docker container to use when running this orb's jobs
+    docker:
+      - image: '<<parameters.image>>:<<parameters.tag>>'
+    parameters:
+      image:
+        default: circleci/python
+        description: Docker image name
+        type: string
+      tag:
+        default: '3.6'
+        description: Image tag
+        type: string
+
+jobs:
+  deploy:
+    description: Deploy stack to Swarmpit
+    executor: << parameters.executor >>
+    parameters:
+      executor:
+        type: executor
+        default: default
+        description: |
+          Executor to use for this job, defaults to this orb's `default` executor
+      stack_name:
+        type: string
+        description: Name of the stack to deploy.
+      compose_file_path:
+        type: string
+        description: Path to the stack definition (docker-compose) file.
+        default: docker-compose.yml
+      swarmpit_api_url:
+        type: string
+        description: URL of the API endpoint of your Swarmpit instance (eg. https://swarmpit.my.cloud/api).
+        default: "$SWARMPIT_API_URL"
+      swarmpit_api_key:
+        type: string
+        description: API Key to access the Swarmpit API. You will get it in Swarmpit account management.
+        default: "$SWARMPIT_API_KEY"
+    steps:
+      - checkout
+      - deploy_stack:
+          stack_name: << parameters.stack_name >>
+          compose_file_path: << parameters.compose_file_path >>
+          swarmpit_api_url: << parameters.swarmpit_api_url >>
+          swarmpit_api_key: << parameters.swarmpit_api_key >>
 
 examples:
   stack_deploy:
