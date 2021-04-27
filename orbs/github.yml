@@ -49,6 +49,25 @@ commands:
           name: Merge PR
           command: gh pr merge $CI_PULL_REQUEST <<# parameters.delete_branch >>--delete-branch<</ parameters.delete_branch >> <<# parameters.merge >>--merge<</ parameters.merge >> <<# parameters.rebase >>--rebase<</ parameters.rebase >> <<# parameters.squash >>--squash<</ parameters.squash >>
 
+  release:
+    description: Create a new GitHub Release for a repository.
+    parameters:
+      tag:
+        type: string
+        description: >
+          If a matching git tag does not yet exist, one will automatically get created from the latest state
+          of the default branch. Use --target to override this.
+
+          To create a release from an annotated git tag, first create one locally with git,
+          push the tag to GitHub, then run this command.
+      files:
+        type: string
+        description: A list of asset files
+    steps:
+      - run:
+          name: Release
+          command: gh release create << parameters.tag >> << parameters.files >>
+
 examples:
   automerge_dependabot_prs:
     description: >
@@ -56,7 +75,7 @@ examples:
     usage:
       version: 2.1
       orbs:
-        github: topmonks/github@1.0.2
+        github: topmonks/github@1.1.0
       jobs:
         merge_pr:
           docker:
