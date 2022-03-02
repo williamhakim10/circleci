@@ -39,4 +39,4 @@ commands:
       - run:
           name: Invalidate Cloudfront distribution << parameters.distribution_id >>
           command: |
-            aws cloudfront create-invalidation --distribution-id=<< parameters.distribution_id >> --paths=<< parameters.paths >>
+            aws cloudfront create-invalidation --distribution-id=${<< parameters.distribution_id >>} --paths=<< parameters.paths >>
